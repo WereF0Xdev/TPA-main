@@ -1,0 +1,118 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '1.6.0'
+group = 'fox.mods.tpa'
+
+base {
+    archivesName = 'tpa'
+}
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "launcher" {
+                    source sourceSets.main
+                }
+            }
+        }
+        client {
+            property 'forge.enabledGameTestNamespaces', 'tpa'
+        }
+        server {
+            property 'forge.enabledGameTestNamespaces', 'tpa'
+            args '--nogui'
+        }
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', 'tpa'
+        }
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', 'tpa', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    // ForgeGradle automatically adds the Forge maven and Maven Central for you
+    mavenLocal()
+    flatDir {
+        dirs "libs"
+    }
+    flatDir {
+        dirs 'libraries'
+    }
+    flatDir {
+        dirs '.idea/libraries'
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:1.20.1-47.3.5"
+    "fox.mods.foxapi:1.0.0"
+    implementation files('libs/foxapi-1.0.0.jar')
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+        minecraft_version: '1.20.1', minecraft_version_range: '[1.20.1,)',
+        forge_version: '47.3.5', forge_version_range: '[47.3.1,)',
+        loader_version_range: '[1.20.1,)',
+        mod_id: 'tpa', mod_name: 'TPA', mod_license: 'All Rights Reserved', mod_version: '1.6.0',
+        mod_authors: 'WereF0X', mod_description: 'Adds an easy way for players to teleport to each other!',
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+            'Specification-Title'     : 'TPA',
+            'Specification-Vendor'    : 'WereF0X',
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : 'WereF0X',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+    finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
