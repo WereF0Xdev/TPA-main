@@ -66,8 +66,8 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:1.20.1-47.3.5"
-    "fox.mods.foxapi:1.0.0"
-    implementation files('libs/foxapi-1.0.0.jar')
+    "fox.mods.foxapi:1.2.0"
+    implementation files('libs/foxapi-1.2.0.jar')
 }
 
 tasks.named('processResources', ProcessResources).configure {

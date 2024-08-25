@@ -80,6 +80,10 @@ public class TpaModVariables {
 			clone.tpaReceiver = original.tpaReceiver;
 			clone.tpaToggle = original.tpaToggle;
 			clone.tpaInCooldown = original.tpaInCooldown;
+			clone.backX = original.backX;
+			clone.backY = original.backY;
+			clone.backZ = original.backZ;
+			clone.setBack = original.setBack;
 			if (!event.isWasDeath()) {
 			}
 			if (!event.getEntity().level().isClientSide()) {
@@ -125,6 +129,10 @@ public class TpaModVariables {
 		public String tpaReceiver = "";
 		public boolean tpaToggle = false;
 		public boolean tpaInCooldown = false;
+		public double backX = 0;
+		public double backY = 0;
+		public double backZ = 0;
+		public boolean setBack = false;
 
 		public void syncPlayerVariables(Entity entity) {
 			if (entity instanceof ServerPlayer serverPlayer)
@@ -137,6 +145,10 @@ public class TpaModVariables {
 			nbt.putString("tpaReceiver", tpaReceiver);
 			nbt.putBoolean("tpaToggle", tpaToggle);
 			nbt.putBoolean("tpaInCooldown", tpaInCooldown);
+			nbt.putDouble("backX", backX);
+			nbt.putDouble("backY", backY);
+			nbt.putDouble("backZ", backZ);
+			nbt.putBoolean("setBack", setBack);
 			return nbt;
 		}
 
@@ -146,6 +158,10 @@ public class TpaModVariables {
 			tpaReceiver = nbt.getString("tpaReceiver");
 			tpaToggle = nbt.getBoolean("tpaToggle");
 			tpaInCooldown = nbt.getBoolean("tpaInCooldown");
+			backX = nbt.getDouble("backX");
+			backY = nbt.getDouble("backY");
+			backZ = nbt.getDouble("backZ");
+			setBack = nbt.getBoolean("setBack");
 		}
 	}
 
@@ -183,6 +199,10 @@ public class TpaModVariables {
 					variables.tpaReceiver = message.data.tpaReceiver;
 					variables.tpaToggle = message.data.tpaToggle;
 					variables.tpaInCooldown = message.data.tpaInCooldown;
+					variables.backX = message.data.backX;
+					variables.backY = message.data.backY;
+					variables.backZ = message.data.backZ;
+					variables.setBack = message.data.setBack;
 				}
 			});
 			context.setPacketHandled(true);

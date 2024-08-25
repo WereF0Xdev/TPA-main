@@ -1,5 +1,7 @@
 package fox.mods.tpa.procedures;
 
+import fox.mods.api.tpa.configuration.TpaFileConfiguration;
+import fox.mods.tpa.TpaMod;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,14 +10,13 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.CommandSourceStack;
 
 import fox.mods.tpa.network.TpaModVariables;
-import fox.mods.foxapi.tpa.configuration.TpaFileConfiguration;
-import fox.mods.foxapi.tpa.init.TpaModConfigs;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.world.level.LevelAccessor;
 
-public class SendTpaRequestProcedure {
-	public static void execute(CommandContext<CommandSourceStack> arguments, Entity entity) {
+public class SendTpHereProcedure {
+	public static void execute(LevelAccessor world, CommandContext<CommandSourceStack> arguments, Entity entity) {
 		if (entity == null)
 			return;
 		if ((entity.getCapability(TpaModVariables.PLAYER_VARIABLES_CAPABILITY, null).orElse(new TpaModVariables.PlayerVariables())).tpaInCooldown == false) {
@@ -47,7 +48,7 @@ public class SendTpaRequestProcedure {
 					}
 				}.getEntity()).getCapability(TpaModVariables.PLAYER_VARIABLES_CAPABILITY, null).orElse(new TpaModVariables.PlayerVariables())).tpaToggle == true) {
 					if (entity instanceof Player _player && !_player.level().isClientSide())
-						_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + TpaFileConfiguration.TPISSENT.get())), false);
+						_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + TpaFileConfiguration.TPHEREISSENT.get())), false);
 					if (entity instanceof Player _player && !_player.level().isClientSide())
 						_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + TpaFileConfiguration.TPHAPPENED.get())), false);
 					{
@@ -179,18 +180,41 @@ public class SendTpaRequestProcedure {
 							}.getEntity()));
 						});
 					}
-					if ((new Object() {
-						public Entity getEntity() {
-							try {
-								return EntityArgument.getEntity(arguments, "player");
-							} catch (CommandSyntaxException e) {
-								e.printStackTrace();
-								return null;
+					if ((TpaFileConfiguration.TPHEREISRECEIVED.get()).contains("%tpauser%")) {
+						if ((new Object() {
+							public Entity getEntity() {
+								try {
+									return EntityArgument.getEntity(arguments, "player");
+								} catch (CommandSyntaxException e) {
+									e.printStackTrace();
+									return null;
+								}
 							}
-						}
-					}.getEntity()) instanceof Player _player && !_player.level().isClientSide())
-						_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + TpaFileConfiguration.TPISRECEIVED.get())), false);
+						}.getEntity()) instanceof Player _player && !_player.level().isClientSide())
+							_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + (TpaFileConfiguration.TPHEREISRECEIVED.get()).replace("%tpauser%", entity.getDisplayName().getString()))), false);
+					} else {
+						if ((new Object() {
+							public Entity getEntity() {
+								try {
+									return EntityArgument.getEntity(arguments, "player");
+								} catch (CommandSyntaxException e) {
+									e.printStackTrace();
+									return null;
+								}
+							}
+						}.getEntity()) instanceof Player _player && !_player.level().isClientSide())
+							_player.displayClientMessage(Component.literal((TpaFileConfiguration.PREFIX.get() + "" + TpaFileConfiguration.TPHEREISRECEIVED.get())), false);
+					}
 				}
+				TpaMod.queueServerWork((int) (20 * (double) TpaFileConfiguration.COOLDOWNTIME.get()), () -> {
+					{
+						boolean _setval = false;
+						entity.getCapability(TpaModVariables.PLAYER_VARIABLES_CAPABILITY, null).ifPresent(capability -> {
+							capability.tpaInCooldown = _setval;
+							capability.syncPlayerVariables(entity);
+						});
+					}
+				});
 			} else if (entity == (new Object() {
 				public Entity getEntity() {
 					try {

@@ -1,6 +1,7 @@
 
 package fox.mods.tpa.command;
 
+import fox.mods.tpa.procedures.AcceptTpProcedure;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -12,10 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.commands.Commands;
 
-import fox.mods.tpa.procedures.AcceptTpaRequestProcedure;
-
 @Mod.EventBusSubscriber
-public class TPAcceptCommand {
+public class TpAcceptCommand {
 	@SubscribeEvent
 	public static void registerCommand(RegisterCommandsEvent event) {
 		if (event.getCommandSelection() == Commands.CommandSelection.DEDICATED)
@@ -33,7 +32,7 @@ public class TPAcceptCommand {
 						if (entity != null)
 							direction = entity.getDirection();
 
-						AcceptTpaRequestProcedure.execute(world, entity);
+						AcceptTpProcedure.execute(world, entity);
 						return 0;
 					}));
 	}
